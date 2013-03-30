@@ -16,12 +16,13 @@
 struct rt_info * sched_grma(struct list_head *head, struct global_sched_domain *g)
 {
 	int count = 1, cpus = count_global_cpus(g);
-	struct rt_info *it, *lowest = get_global_task(head->next);
+	//struct rt_info *it, *lowest = get_global_task(head->next);
+	struct rt_info *it, *tmp_it, *spin_tmp_it, *lowest;
 	struct list_head tmp_head;
-	struct rt_info *tmp_it, *spin_tmp_it=NULL;
+	*spin_tmp_it=NULL;
 
-	it = lowest;
-	INIT_LIST_HEAD(&lowest->task_list[SCHED_LIST1]);
+	//it = lowest;
+	//INIT_LIST_HEAD(&lowest->task_list[SCHED_LIST1]);
         /********************* SH-ST *********************/
         INIT_LIST_HEAD(&tmp_head);      /*This list contains tasks of GLOBAL_LIST in the same 
                                          * order except SPINNING and SUSPENDED tasks */
@@ -49,12 +50,13 @@ struct rt_info * sched_grma(struct list_head *head, struct global_sched_domain *
         }
         lowest=list_first_entry(&(tmp_head), struct rt_info, task_list[SCHED_LIST2]);
         it=lowest;
+        INIT_LIST_HEAD(&lowest->task_list[SCHED_LIST1]);
         
 
 	//list_for_each_entry_continue(it, head, task_list[GLOBAL_LIST]) {
-        list_for_each_entry_continue(it, head, task_list[SCHED_LIST2]) {
+        list_for_each_entry_continue(it, &tmp_head, task_list[SCHED_LIST2]) {
         /********************* SH-END *********************/
-            count++;
+        count++;
 		list_add_before(lowest, it, SCHED_LIST1);
 
 		if(count == cpus)
